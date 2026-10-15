@@ -252,9 +252,9 @@
 
         <div class="section-title" id="l_secC">C. Pembayaran QRIS</div>
         <div class="qris-box">
-            <p id="l_qrisText" style="font-weight: 600; color: #333; margin-bottom: 12px;">Scan untuk Pembayaran</p>
+            <p id="l_qrisText" style="font-weight: 600; color: #333; margin-bottom: 12px;">Download QRIS dan Scan untuk Pembayaran</p>
             <button type="button" onclick="downloadQrisHD()" id="l_downloadQrisBtn" style="display: inline-block; background: #1D976C; color: white; padding: 12px 24px; border-radius: 8px; border: none; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(29,151,108,0.3); cursor: pointer;">
-                📥 Download/Screenshot QRIS
+                📥 Download QRIS
             </button>
         </div>
         
@@ -386,8 +386,9 @@
             packagePlaceholder: "-- Pilih Paket Sewa --",
             jam1: "1 JAM", jam3: "3 JAM", jam6: "6 JAM", jam8: "8 JAM",
             secC: "C. Pembayaran QRIS",
-            qrisText: "Scan QRIS untuk Pembayaran",
-            downloadQrisBtn: "📥 Download/Screenshot QRIS",
+            qrisText: "Download QRIS dan Scan untuk Pembayaran",
+            downloadQrisBtn: "📥 Download QRIS",
+            qrisNote: "(Klik tombol di atas untuk otomatis menyimpan QRIS ke galeri HP)",
             proofLabel: "Upload Bukti Pembayaran",
             secD: "D. Persetujuan Aturan",
             agreePrefix: "Saya telah membaca dan menyetujui",
@@ -446,8 +447,9 @@
             packagePlaceholder: "-- Select Rental Package --",
             jam1: "1 HOUR", jam3: "3 HOURS", jam6: "6 HOURS", jam8: "8 HOURS",
             secC: "C. QRIS Payment",
-            qrisText: "Scan QRIS to Pay",
-            downloadQrisBtn: "📥 Download/Screenshot QRIS",
+            qrisText: "Download QRIS and Scan to Pay",
+            downloadQrisBtn: "📥 Download QRIS",
+            qrisNote: "(Click the button above to automatically save QRIS to your phone gallery)",
             proofLabel: "Upload Payment Proof",
             secD: "D. Agreement & Rules",
             agreePrefix: "I have read and agree to the",
@@ -682,54 +684,49 @@
             const combinedDataUrl = await mergeThreeImages(fileSelfie, fileKtp, fileBukti);
             const base64DataOnly = combinedDataUrl.split(',')[1];
 
-            const dataToKirim = {
-                f_nama: dataNama,
-                f_kode: dataKodePilihan,
-                f_paket: dataPaketPilihan,
-                fotoGabunganBase64: base64DataOnly,
-                fotoGabunganType: 'image/jpeg'
-            };
+            const formData = new URLSearchParams();
+            formData.append('f_nama', dataNama);
+            formData.append('f_kode', dataKodePilihan);
+            formData.append('f_paket', dataPaketPilihan);
+            formData.append('fotoGabunganBase64', base64DataOnly);
 
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7B78rSA5AiDCr3DBY1AcP-GYrQ468k7eDnfywZFE_nrFOJj6IQBgtUc5s1lX6e6-kmA/exec";
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwelchcfgefbk1d51vdPbO6VyBNJYo6CA1y8um-QOjxoqcexzelO0wjdKrasP1Rq1bCzg/exec";
 
-            // Menggunakan fetch standar tanpa no-cors agar server merespon secara valid
-            const response = await fetch(SCRIPT_URL, {
+            await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify(dataToKirim)
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData.toString()
             });
 
-            const result = await response.json();
-
-            if (result.result === "SUKSES") {
-                document.getElementById('loadingUI').style.display = 'none';
-                
-                var headerSec = document.getElementById('headerSection');
-                if(headerSec) {
-                    headerSec.style.display = 'none';
-                }
-
-                var nomorWA = "6281391077606";
-                var pesanWA = currentLang === 'id' ? 
-                    "Halo, mau konfirmasi sewa sepeda self service.\n\n" + 
-                    "Nama: " + dataNama + "\n" + 
-                    "Kode Sepeda: " + dataKodePilihan + "\n" + 
-                    "Paket Sewa: " + dataPaketPilihan :
-                    "Hello, I would like to confirm my self-service bike rental.\n\n" + 
-                    "Name: " + dataNama + "\n" + 
-                    "Bike Code: " + dataKodePilihan + "\n" + 
-                    "Rental Package: " + dataPaketPilihan;
-
-                var linkAkhir = "https://wa.me/" + nomorWA + "?text=" + encodeURIComponent(pesanWA);
-                document.getElementById('waLinkBtn').href = linkAkhir;
-
-                var suksesEl = document.getElementById('suksesUI');
-                suksesEl.style.display = 'block';
-            } else {
-                throw new Error(result.message || "Gagal menyimpan di server.");
+            document.getElementById('loadingUI').style.display = 'none';
+            
+            var headerSec = document.getElementById('headerSection');
+            if(headerSec) {
+                headerSec.style.display = 'none';
             }
 
-        } catch (error) {
-            alert((currentLang === 'id' ? "Gagal mengupload, periksa koneksi Anda: " : "Upload failed, check your connection: ") + error.message);
+            var nomorWA = "6281391077606";
+            var pesanWA = currentLang === 'id' ? 
+                "Halo, mau konfirmasi sewa sepeda self service.\n\n" + 
+                "Nama: " + dataNama + "\n" + 
+                "Kode Sepeda: " + dataKodePilihan + "\n" + 
+                "Paket Sewa: " + dataPaketPilihan :
+                "Hello, I would like to confirm my self-service bike rental.\n\n" + 
+                "Name: " + dataNama + "\n" + 
+                "Bike Code: " + dataKodePilihan + "\n" + 
+                "Rental Package: " + dataPaketPilihan;
+
+            var linkAkhir = "https://wa.me/" + nomorWA + "?text=" + encodeURIComponent(pesanWA);
+            document.getElementById('waLinkBtn').href = linkAkhir;
+
+            var suksesEl = document.getElementById('suksesUI');
+            suksesEl.style.display = 'block';
+
+        } catch (err) {
+            alert("Terjadi kesalahan saat memproses foto: " + err.message);
             formContainer.style.display = 'block';
             document.getElementById('loadingUI').style.display = 'none';
         }
