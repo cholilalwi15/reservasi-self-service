@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Reservasi Sepeda</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; }
+        button { background: #4CAF50; color: white; padding: 12px 20px; border: none; cursor: pointer; width: 100%; font-size: 16px; }
+        button:disabled { background: #ccc; }
+        #loading { display: none; text-align: center; margin-top: 10px; color: #555; }
+    </style>
+</head>
+<body>
+
+    <form id="myForm">
+        <div class="form-group">
+            <label>Nama Lengkap:</label>
+            <input type="text" id="f_nama" name="f_nama" required>
+        </div>
+        <div class="form-group">
+            <label>Kode Sewa / ID:</label>
+            <input type="text" id="f_kode" name="f_kode" required>
+        </div>
+        <div class="form-group">
+            <label>Pilih Paket:</label>
+            <select id="f_paket" name="f_paket">
+                <option value="Paket 1 Jam">Paket 1 Jam</option>
+                <option value="Paket Harian">Paket Harian</option>
+            </select>
+        </div>
+        
+        <!-- Contoh input kamera/file -->
+        <div class="form-group">
+            <label>Ambil / Unggah Foto:</label>
+            <input type="file" id="f_foto" accept="image/*" capture="environment">
+        </div>
+
+        <button type="submit" id="btnSubmit">Kirim Reservasi</button>
+        <div id="loading">Sedang mengirim data, mohon tunggu...</div>
+    </form>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwelchcfgefbk1d51vdPbO6VyBNJYo6CA1y8um-QOjxoqcexzelO0wjdKrasP1Rq1bCzg/exec"; // <-- GANTI DENGAN URL WEB APP ANDA
+
+        document.getElementById('myForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btnSubmit');
+            const loading = document.getElementById('loading');
+            btn.disabled = true;
+            loading.style.display = 'block';
+
+            const fileInput = document.getElementById('f_foto').files[0];
+
+            if (fileInput) {
+                const reader = new FileReader();
+                reader.readAsDataURL(fileInput);
+                reader.onload = function() {
+                    const payload = {
+                        f_nama: document.getElementById('f_nama').value,
+                        f_kode: document.getElementById('f_kode').value,
+                        f_paket: document.getElementById('f_paket').value,
+                        fotoGabunganBase64: reader.result,
+                        fotoGabunganType: fileInput.type
+                    };
+                    kirimKeAppsScript(payload);
+                };
+            } else {
+                const payload = {
+                    f_nama: document.getElementById('f_nama').value,
+                    f_kode: document.getElementById('f_kode').value,
+                    f_paket: document.getElementById('f_paket').value,
+                    fotoGabunganBase64: "",
+                    fotoGabunganType: ""
+                };
+                kirimKeAppsScript(payload);
+            }
+        });
+
+        function kirimKeAppsScript(data) {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Diperlukan untuk bypass CORS Google Script
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert("Reservasi Berhasil Dikirim!");
+                document.getElementById('myForm').reset();
+                location.reload();
+            })
+            .catch(error => {
+                alert("Terjadi kesalahan: " + error);
+                document.getElementById('btnSubmit').disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
