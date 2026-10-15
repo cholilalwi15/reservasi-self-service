@@ -2,103 +2,738 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Reservasi Sepeda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="t_title">RSVP Sewa Sepeda - JOW</title>
+    
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://api.qrserver.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; box-sizing: border-box; }
-        button { background: #4CAF50; color: white; padding: 12px 20px; border: none; cursor: pointer; width: 100%; font-size: 16px; }
-        button:disabled { background: #ccc; }
-        #loading { display: none; text-align: center; margin-top: 10px; color: #555; }
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: linear-gradient(135deg, #1D976C 0%, #93F9B9 100%);
+            min-height: 100vh;
+            margin: 0; 
+            padding: 20px 15px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start;
+        }
+
+        .main-card { 
+            background: rgba(255, 255, 255, 0.97); 
+            backdrop-filter: blur(10px);
+            padding: 30px 20px; 
+            border-radius: 24px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            width: 100%; 
+            max-width: 480px; 
+            position: relative;
+            display: flex;
+            flex-direction: column; 
+            align-items: stretch;
+        }
+
+        .lang-switcher-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+        }
+        .lang-switcher {
+            background: #f8fafc; border: 2px solid #e2e8f0;
+            color: #1D976C; padding: 6px 14px; border-radius: 20px;
+            font-weight: 700; font-size: 0.85rem; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .lang-switcher:hover {
+            background: #1D976C; color: white; border-color: #1D976C;
+        }
+
+        .form-header { text-align: center; margin-bottom: 25px; }
+        .form-header h2 { 
+            color: #1D976C; font-size: 24px; font-weight: 800;
+            letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .form-header p { color: #718096; font-weight: 600; font-size: 15px; margin: 0; }
+
+        .alert-warning {
+            background-color: #fffbeb; border-color: #fef3c7;
+            color: #92400e; border-radius: 12px;
+        }
+
+        .section-title { 
+            font-size: 0.85rem; font-weight: 700; color: #1b5e20; 
+            background: #e8f5e9; padding: 10px 14px; margin: 25px 0 15px 0; 
+            text-transform: uppercase; border-left: 5px solid #1D976C; 
+            border-radius: 0 8px 8px 0;
+        }
+
+        .form-label { color: #2d3748; font-weight: 600; margin-bottom: 6px; }
+
+        .form-control, .form-select { 
+            padding: 12px 15px; border-radius: 10px; 
+            border: 2px solid #e2e8f0; background-color: #f8fafc;
+            transition: all 0.3s ease; color: #2d3748;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1D976C; background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(29, 151, 108, 0.15);
+        }
+        .form-select { font-weight: 500; cursor: pointer; }
+
+        .file-upload-wrapper {
+            position: relative; overflow: hidden;
+            display: inline-block; width: 100%;
+            cursor: pointer;
+        }
+        .file-upload-wrapper input[type=file] {
+            position: absolute; left: 0; top: 0;
+            opacity: 0; width: 100%; height: 100%; cursor: pointer;
+            z-index: 10;
+        }
+        .custom-file-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; border-radius: 10px;
+            border: 2px solid #e2e8f0; background: #f8fafc;
+            color: #4a5568; font-weight: 600; width: 100%;
+            transition: all 0.3s ease;
+        }
+        .file-upload-wrapper:hover .custom-file-btn {
+            border-color: #1D976C; background: #ffffff;
+        }
+        .file-name-display {
+            font-size: 0.85rem; color: #718096; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis; margin-left: 10px;
+        }
+
+        .qris-box {
+            background: #ffffff; border: 2px dashed #cbd5e1; 
+            border-radius: 16px; padding: 20px; 
+            text-align: center; margin-bottom: 20px;
+        }
+
+        .form-check {
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 12px; padding: 15px 15px 15px 40px;
+            margin-bottom: 12px;
+        }
+        .form-check-input:checked {
+            background-color: #1D976C; border-color: #1D976C;
+        }
+
+        .btn-submit { 
+            background: linear-gradient(to right, #1D976C, #28a745); 
+            border: none; border-radius: 12px; font-size: 16px; 
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            padding: 16px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-submit:hover { 
+            background: linear-gradient(to right, #157956, #1e7e34); 
+            transform: translateY(-2px);
+        }
+
+        .manual-wa-link { 
+            display: block; background: linear-gradient(to right, #25D366, #128C7E); 
+            color: white !important; padding: 16px; border-radius: 12px; 
+            font-weight: bold; text-decoration: none; margin-top: 25px; 
+            text-align: center; font-size: 1.1rem; 
+        }
+
+        .loading-ui { padding: 40px 0; }
+        .success-icon { font-size: 60px; margin-bottom: 10px; }
+
+        .modal-backdrop { z-index: 1040 !important; }
+        .modal { z-index: 1050 !important; }
+        @media (max-width: 576px) {
+            .modal-dialog {
+                margin: 0.5rem;
+                max-width: calc(100% - 1rem);
+            }
+            .modal-body {
+                max-height: 65vh;
+                overflow-y: auto;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <form id="myForm">
-        <div class="form-group">
-            <label>Nama Lengkap:</label>
-            <input type="text" id="f_nama" name="f_nama" required>
+<div class="main-card">
+    
+    <!-- HEADER -->
+    <div id="headerSection">
+        <div class="lang-switcher-wrapper">
+            <button type="button" class="lang-switcher" id="langBtn" onclick="toggleLanguage()">🌐 EN</button>
         </div>
-        <div class="form-group">
-            <label>Kode Sewa / ID:</label>
-            <input type="text" id="f_kode" name="f_kode" required>
+        <div class="form-header">
+            <h2 id="l_mainTitle">RESERVASI SEWA SEPEDA</h2>
+            <p id="l_subTitle">Self Service</p>
         </div>
-        <div class="form-group">
-            <label>Pilih Paket:</label>
-            <select id="f_paket" name="f_paket">
-                <option value="Paket 1 Jam">Paket 1 Jam</option>
-                <option value="Paket Harian">Paket Harian</option>
-            </select>
+    </div>
+
+    <!-- FORM UTAMA -->
+    <form id="formContainer" onsubmit="jalankanUpload(event)">
+        <div class="alert alert-warning shadow-sm" style="font-size: 0.85rem; line-height: 1.6;">
+            <strong id="l_flowTitle">📌 Alur Penyewaan Mandiri:</strong>
+            <ol class="mb-0 ps-3 mt-1 text-dark">
+                <li id="l_flow1">Isi formulir & upload identitas Anda dibawah</li>
+                <li id="l_flow2">Bayar via QRIS & Kirim tanggapan </li>
+                <li id="l_flow3">Dapatkan <strong>password gemboknya dan Gowes</strong>.</li>
+            </ol>
+        </div>
+
+        <div class="section-title" id="l_secA">A. Data Diri Penyewa</div>
+        <div class="mb-3">
+            <label class="form-label small"><span id="l_nameLabel">Nama Lengkap</span> <span class="text-muted fw-normal" id="l_nameSub">(sesuai Identitas)</span></label>
+            <input type="text" name="f_nama" class="form-control" id="f_nama" placeholder="Ketik nama Anda..." required>
         </div>
         
-        <!-- Contoh input kamera/file -->
-        <div class="form-group">
-            <label>Ambil / Unggah Foto:</label>
-            <input type="file" id="f_foto" accept="image/*" capture="environment">
+        <div class="mb-3">
+            <label class="form-label small" id="l_selfieLabel">Upload Foto Selfie</label>
+            <div class="file-upload-wrapper">
+                <button type="button" class="custom-file-btn">
+                    <span id="l_chooseFile1">📁 Choose File</span>
+                    <span class="file-name-display" id="label_f_selfie">Belum ada file</span>
+                </button>
+                <input type="file" id="f_selfie" name="f_selfie" accept="image/*" capture="user" required onchange="updateFileName(this, 'label_f_selfie')">
+            </div>
+            <div class="form-text text-muted" id="l_selfieDesc" style="font-size: 0.65rem;">Membuka kamera depan secara otomatis. Pastikan wajah tampak jelas.</div>
         </div>
 
-        <button type="submit" id="btnSubmit">Kirim Reservasi</button>
-        <div id="loading">Sedang mengirim data, mohon tunggu...</div>
+        <div class="mb-3">
+            <label class="form-label small">
+                <span id="l_idLabel">Upload Kartu Identitas</span> 
+                <span class="text-muted fw-normal" id="l_idSub">(KTP/SIM/Lainnya)</span>
+            </label>
+            <div class="file-upload-wrapper">
+                <button type="button" class="custom-file-btn">
+                    <span id="l_chooseFile2">📁 Choose File</span>
+                    <span class="file-name-display" id="label_f_ktp">Belum ada file</span>
+                </button>
+                <input type="file" id="f_ktp" name="f_ktp" accept="image/*" required onchange="updateFileName(this, 'label_f_ktp')">
+            </div>
+            <div class="form-text text-muted" id="l_idDesc" style="font-size: 0.65rem;">Kami akan memastikan keamanan data penyewa.</div>
+        </div>
+
+        <div class="section-title" id="l_secB">B. Pilih Unit & Paket Sewa</div>
+        <div class="mb-3">
+            <label class="form-label small" id="l_bikeCodeLabel">Kode Sepeda</label>
+            <div class="form-text text-muted" id="l_bikeNote" style="font-size: 0.8rem; margin-bottom: 8px;">(Pastikan Anda telah mengecek sepeda pilihan anda, misal rem, sadel, ban, kenyamanan, dll)</div>
+            <select class="form-select" id="f_kode" name="f_kode" required>
+                <option value="" disabled selected id="l_bikePlaceholder">-- Pilih Kode Sepeda --</option>
+                <option value="BIKE01">BIKE01</option>
+                <option value="BIKE02">BIKE02</option>
+                <option value="BIKE03">BIKE03</option>
+                <option value="BIKE04">BIKE04</option>
+                <option value="BIKE05">BIKE05</option>
+                <option value="BIKE06">BIKE06</option>
+                <option value="BIKE07">BIKE07</option>
+                <option value="BIKE08">BIKE08</option>
+                <option value="BIKE09">BIKE09</option>
+                <option value="BIKE10">BIKE10</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small" id="l_packageLabel">Paket Sewa</label>
+            <select class="form-select" id="f_paket" name="f_paket" required>
+                <option value="" disabled selected id="l_packagePlaceholder">-- Pilih Paket Sewa --</option>
+                <option value="1 JAM" id="opt_p1">1 JAM</option>
+                <option value="3 JAM" id="opt_p3">3 JAM</option>
+                <option value="6 JAM" id="opt_p6">6 JAM</option>
+                <option value="8 JAM" id="opt_p8">8 JAM</option>
+            </select>
+        </div>
+
+        <div class="section-title" id="l_secC">C. Pembayaran QRIS</div>
+        <div class="qris-box">
+            <p id="l_qrisText" style="font-weight: 600; color: #333; margin-bottom: 12px;">Download QRIS dan Scan untuk Pembayaran</p>
+            <button type="button" onclick="downloadQrisHD()" id="l_downloadQrisBtn" style="display: inline-block; background: #1D976C; color: white; padding: 12px 24px; border-radius: 8px; border: none; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(29,151,108,0.3); cursor: pointer;">
+                📥 Download QRIS
+            </button>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label small" id="l_proofLabel">Upload Bukti Pembayaran</label>
+            <div class="file-upload-wrapper">
+                <button type="button" class="custom-file-btn">
+                    <span id="l_chooseFile3">📁 Choose File</span>
+                    <span class="file-name-display" id="label_f_bukti">Belum ada file</span>
+                </button>
+                <input type="file" id="f_bukti" name="f_bukti" accept="image/*" required onchange="updateFileName(this, 'label_f_bukti')">
+            </div>
+        </div>
+
+        <div class="section-title" id="l_secD">D. Persetujuan Aturan</div>
+        <div class="mb-4">
+            <div class="form-check">
+                <input class="form-check-input mt-1" type="checkbox" id="f_setuju_terms" name="f_setuju_terms" required>
+                <label class="form-check-label text-secondary" style="font-size: 0.85rem; line-height: 1.5;" for="f_setuju_terms">
+                    <span id="l_agreePrefix">Saya telah membaca dan menyetujui</span> 
+                    <a href="#" class="text-primary text-decoration-underline fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal" id="l_linkTerms">
+                        Ketentuan Layanan dan Kebijakan Privasi
+                    </a> 
+                    <span id="l_agreeSuffix">(Termasuk hak penyewa, sanksi hukum/publikasi, keamanan data serta garansi penghapusan data otomatis).</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="alert alert-danger" id="l_warningAlert" style="font-size: 0.8rem; margin-bottom: 8px;">
+            🚨 <strong>PERINGATAN:</strong> Sepeda dilengkapi fitur GPS.
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 py-2 fw-bold btn-submit" id="l_submitBtn">KIRIM TANGGAPAN</button>
     </form>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwelchcfgefbk1d51vdPbO6VyBNJYo6CA1y8um-QOjxoqcexzelO0wjdKrasP1Rq1bCzg/exec"; // <-- GANTI DENGAN URL WEB APP ANDA
+    <!-- LOADING UI -->
+    <div id="loadingUI" class="text-center loading-ui" style="display: none;">
+        <div class="spinner-border text-success mb-3" style="width: 3.5rem; height: 3.5rem; color: #1D976C !important;"></div>
+        <h5 class="fw-bold" id="l_loadingTitle" style="color: #1D976C;">Memproses Data...</h5>
+        <p class="text-muted small" id="l_loadingDesc">Mohon tunggu, sedang mengirim data...</p>
+    </div>
 
-        document.getElementById('myForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById('btnSubmit');
-            const loading = document.getElementById('loading');
-            btn.disabled = true;
-            loading.style.display = 'block';
+    <!-- SUKSES UI -->
+    <div id="suksesUI" class="text-center loading-ui" style="display: none;">
+        <div class="success-icon">✅</div>
+        <h3 class="fw-bold mb-2" id="l_successTitle" style="color: #1D976C;">Terima Kasih!</h3>
+        <p class="text-secondary small mb-4" id="l_successDesc" style="line-height: 1.6;">Data telah direkam. Silakan klik tombol di bawah untuk konfirmasi WhatsApp dan mendapatkan kode gembok:</p>
+        <a id="waLinkBtn" href="#" target="_blank" class="manual-wa-link">💬 <span id="l_waBtnText">Konfirmasi ke WhatsApp untuk dapat dikirim password/kodenya</span></a>
+    </div>
 
-            const fileInput = document.getElementById('f_foto').files[0];
+</div>
 
-            if (fileInput) {
-                const reader = new FileReader();
-                reader.readAsDataURL(fileInput);
-                reader.onload = function() {
-                    const payload = {
-                        f_nama: document.getElementById('f_nama').value,
-                        f_kode: document.getElementById('f_kode').value,
-                        f_paket: document.getElementById('f_paket').value,
-                        fotoGabunganBase64: reader.result,
-                        fotoGabunganType: fileInput.type
-                    };
-                    kirimKeAppsScript(payload);
-                };
+<!-- MODAL DI LUAR CARD UTAMA -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fs-6 fw-bold text-dark" id="l_termsModalTitle">Ketentuan Layanan & Kebijakan Privasi (Terms & Privacy Policy)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-secondary" style="font-size: 0.85rem; line-height: 1.6;">
+        <h6 class="fw-bold text-dark mb-1" id="l_term1_title">1. Ganti Rugi Kerusakan & Denda Keterlambatan</h6>
+        <ul class="mb-3 ps-3">
+          <li id="l_term1_1">Penyewa bersedia menanggung biaya perbaikan atas kerusakan fisik unit sepeda akibat kelalaian atau pemakaian yang tidak wajar.</li>
+          <li id="l_term1_2">Penyewa bersedia membayar denda keterlambatan pengembalian sebesar Rp15.000 / jam (di luar toleransi keterlambatan 30 menit).</li>
+        </ul>
+
+        <h6 class="fw-bold text-dark mb-1" id="l_term2_title">2. Tanggung Jawab Pemakaian & Konsekuensi Hukum</h6>
+        <ul class="mb-3 ps-3">
+          <li id="l_term2_1">Penyewa bertanggung jawab penuh atas keselamatan diri, orang lain, serta unit sepeda selama masa peminjaman.</li>
+          <li id="l_term2_2">Setiap tindakan pencurian, penggelapan, perusakan sengaja, atau tindak kriminal lainnya akan diproses sesuai hukum yang berlaku.</li>
+          <li id="l_term2_3"><strong>Sanksi Publikasi & Sosial:</strong> Pihak pengelola berhak mempublikasikan bukti identitas/rekaman CCTV pelaku ke media massa atau akun media sosial publik apabila terjadi pencurian atau tindak kriminal yang tidak diselesaikan secara kekeluargaan.</li>
+        </ul>
+
+        <h6 class="fw-bold text-dark mb-1" id="l_term3_title">3. Wilayah Operasional</h6>
+        <ul class="mb-3 ps-3">
+          <li id="l_term3_1">Sepeda boleh digunakan di area manapun, akan tetapi pengembalian tetap di pos/stasiun rental resmi yang disediakan.</li>
+          <li id="l_term3_2">Pengembalian di luar titik resmi (docking point) dapat dikenakan biaya pemindahan/retrieval.</li>
+        </ul>
+
+        <h6 class="fw-bold text-dark mb-1" id="l_term4_title">4. Hak Penyewa</h6>
+        <ul class="mb-3 ps-3">
+          <li id="l_term4_1">Penyewa berhak memeriksa kondisi fisik sepeda sebelum melakukan reservasi peminjaman.</li>
+          <li id="l_term4_2">Penyewa berhak menikmati semua fitur yang disediakan.</li>
+        </ul>
+
+        <h6 class="fw-bold text-dark mb-1" id="l_term5_title">5. Keamanan Data & Privasi Penyewa (Privacy Policy)</h6>
+        <ul class="mb-0 ps-3">
+          <li id="l_term5_1">Pengelola menjamin kerahasiaan data pribadi Penyewa dan hanya digunakan untuk validasi peminjaman.</li>
+          <li id="l_term5_2">Data-data pribadi akan diverifikasi dan dihapus secara otomatis dari sistem setelah unit sepeda berhasil dikembalikan.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-primary px-3" data-bs-dismiss="modal" id="l_btnAgree">Saya Mengerti & Menyetujui</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPT PENDUKUNG & LOGIKA -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentLang = 'id';
+    
+    const translations = {
+        id: {
+            title: "RSVP Sewa Sepeda - JOW",
+            mainTitle: "RESERVASI SEWA SEPEDA",
+            subTitle: "Self Service",
+            flowTitle: "📌 Alur Penyewaan Mandiri:",
+            flow1: "Isi formulir & upload identitas Anda dibawah",
+            flow2: "Bayar via QRIS & Kirim tanggapan",
+            flow3: "Dapatkan <strong>password gemboknya dan Gowes</strong>.",
+            secA: "A. Data Diri Penyewa",
+            nameLabel: "Nama Lengkap",
+            nameSub: "(sesuai Identitas)",
+            namePlaceholder: "Ketik nama Anda...",
+            selfieLabel: "Upload Foto Selfie",
+            chooseFile: "📁 Choose File",
+            selfieDesc: "Membuka kamera depan secara otomatis. Pastikan wajah tampak jelas.",
+            idLabel: "Upload Kartu Identitas",
+            idSub: "(KTP/SIM/Lainnya)",
+            idDesc: "Kami akan memastikan keamanan data penyewa.",
+            secB: "B. Pilih Unit & Paket Sewa",
+            bikeCodeLabel: "Kode Sepeda",
+            bikeNote: "(Pastikan Anda telah mengecek sepeda pilihan anda, misal rem, sadel, ban, kenyamanan, dll)",
+            bikePlaceholder: "-- Pilih Kode Sepeda --",
+            packageLabel: "Paket Sewa",
+            packagePlaceholder: "-- Pilih Paket Sewa --",
+            jam1: "1 JAM", jam3: "3 JAM", jam6: "6 JAM", jam8: "8 JAM",
+            secC: "C. Pembayaran QRIS",
+            qrisText: "Download QRIS dan Scan untuk Pembayaran",
+            downloadQrisBtn: "📥 Download QRIS",
+            qrisNote: "(Klik tombol di atas untuk otomatis menyimpan QRIS ke galeri HP)",
+            proofLabel: "Upload Bukti Pembayaran",
+            secD: "D. Persetujuan Aturan",
+            agreePrefix: "Saya telah membaca dan menyetujui",
+            linkTerms: "Ketentuan Layanan dan Kebijakan Privasi",
+            agreeSuffix: "(Termasuk hak penyewa, sanksi hukum/publikasi, keamanan data serta garansi penghapusan data otomatis).",
+            termsModalTitle: "Ketentuan Layanan & Kebijakan Privasi (Terms & Privacy Policy)",
+            term1_title: "1. Ganti Rugi Kerusakan & Denda Keterlambatan",
+            term1_1: "Penyewa bersedia menanggung biaya perbaikan atas kerusakan fisik unit sepeda akibat kelalaian atau pemakaian yang tidak wajar.",
+            term1_2: "Penyewa bersedia membayar denda keterlambatan pengembalian sebesar Rp15.000 / jam (di luar toleransi keterlambatan 30 menit).",
+            term2_title: "2. Tanggung Jawab Pemakaian & Konsekuensi Hukum",
+            term2_1: "Penyewa bertanggung jawab penuh atas keselamatan diri, orang lain, serta unit sepeda selama masa peminjaman.",
+            term2_2: "Setiap tindakan pencurian, penggelapan, perusakan sengaja, atau tindak kriminal lainnya akan diproses sesuai hukum yang berlaku.",
+            term2_3: "<strong>Sanksi Publikasi & Sosial:</strong> Pihak pengelola berhak mempublikasikan bukti identitas/rekaman CCTV pelaku ke media massa atau akun media sosial publik apabila terjadi pencurian atau tindak kriminal yang tidak diselesaikan secara kekeluargaan.",
+            term3_title: "3. Wilayah Operasional",
+            term3_1: "Sepeda boleh digunakan di area manapun, akan tetapi pengembalian tetap di pos/stasiun rental resmi yang disediakan.",
+            term3_2: "Pengembalian di luar titik resmi (docking point) dapat dikenakan biaya pemindahan/retrieval.",
+            term4_title: "4. Hak Penyewa",
+            term4_1: "Penyewa berhak memeriksa kondisi fisik sepeda sebelum melakukan reservasi peminjaman.",
+            term4_2: "Penyewa berhak menikmati semua fitur yang disediakan.",
+            term5_title: "5. Keamanan Data & Privasi Penyewa (Privacy Policy)",
+            term5_1: "Pengelola menjamin kerahasiaan data pribadi Penyewa dan hanya digunakan untuk validasi peminjaman.",
+            term5_2: "Data-data pribadi akan diverifikasi dan dihapus secara otomatis dari sistem setelah unit sepeda berhasil dikembalikan.",
+            btnAgree: "Saya Mengerti & Menyetujui",
+            warningAlert: "🚨 <strong>PERINGATAN:</strong> Sepeda dilengkapi fitur GPS.",
+            submitBtn: "Kirim Tanggapan",
+            loadingTitle: "Memproses Data...",
+            loadingDesc: "Mohon tunggu, sedang mengirim data...",
+            successTitle: "Terima Kasih!",
+            successDesc: "Data telah direkam. Silakan klik tombol di bawah untuk konfirmasi WhatsApp dan mendapatkan kode gembok:",
+            waBtnText: "Konfirmasi ke WhatsApp untuk dapat dikirim password/kodenya",
+            fileChosen: "Belum ada file"
+        },
+        en: {
+            title: "Bike Rental RSVP - JOW",
+            mainTitle: "BIKE RENTAL RESERVATION",
+            subTitle: "Self Service",
+            flowTitle: "📌 Self-Service Rental Flow:",
+            flow1: "Fill out the form & upload your ID below",
+            flow2: "Pay via QRIS & Submit response",
+            flow3: "Get the <strong>lock password & Ready to ride!</strong>.",
+            secA: "A. Renter's Personal Data",
+            nameLabel: "Full Name",
+            nameSub: "(as per ID card)",
+            namePlaceholder: "Type your name...",
+            selfieLabel: "Upload Selfie Photo",
+            chooseFile: "📁 Choose File",
+            selfieDesc: "Automatically opens the front camera. Make sure your face is clearly visible.",
+            idLabel: "Upload Identity Card",
+            idSub: "(ID Card/Driver's License/Other)",
+            idDesc: "We will ensure the security of customer data.",
+            secB: "B. Select Unit & Rental Package",
+            bikeCodeLabel: "Bike Code",
+            bikeNote: "(Make sure you have checked your chosen bike, e.g., brakes, saddle, tires, comfort, etc.)",
+            bikePlaceholder: "-- Select Bike Code --",
+            packageLabel: "Rental Package",
+            packagePlaceholder: "-- Select Rental Package --",
+            jam1: "1 HOUR", jam3: "3 HOURS", jam6: "6 HOURS", jam8: "8 HOURS",
+            secC: "C. QRIS Payment",
+            qrisText: "Download QRIS and Scan to Pay",
+            downloadQrisBtn: "📥 Download QRIS",
+            qrisNote: "(Click the button above to automatically save QRIS to your phone gallery)",
+            proofLabel: "Upload Payment Proof",
+            secD: "D. Agreement & Rules",
+            agreePrefix: "I have read and agree to the",
+            linkTerms: "Terms of Service & Privacy Policy",
+            agreeSuffix: "(Including renter's rights, legal/social sanctions, data safety, and automatic data deletion guarantee).",
+            termsModalTitle: "Terms of Service & Privacy Policy",
+            term1_title: "1. Damage Reimbursement & Late Fees",
+            term1_1: "The renter agrees to cover repair costs for physical damages to the bicycle caused by negligence or improper usage.",
+            term1_2: "The renter agrees to pay a late return fee of IDR 15,000 / hour (excluding a 30-minute grace period).",
+            term2_title: "2. Usage Responsibility & Legal Consequences",
+            term2_1: "The renter assumes full responsibility for personal safety, others' safety, and the bicycle during the rental period.",
+            term2_2: "Any theft, embezzlement, intentional damage, or criminal act will be prosecuted under applicable law.",
+            term2_3: "<strong>Social & Media Sanctions:</strong> The management reserves the right to publish offender identities/CCTV records to public media or local social channels if theft or criminal acts are not settled amicably.",
+            term3_title: "3. Operational Area",
+            term3_1: "Bicycles may be ridden anywhere, but returns must be made at designated official rental docks/stations.",
+            term3_2: "Returns outside designated official docking points may incur a relocation/retrieval fee (as agreed by both parties).",
+            term4_title: "4. Renter's Rights",
+            term4_1: "The renter has the right to inspect the bicycle's physical condition prior to reservation.",
+            term4_2: "The renter has the right to enjoy all provided features.",
+            term5_title: "5. Data Security & Privacy Policy",
+            term5_1: "The management guarantees the confidentiality of personal identity data solely for rental verification.",
+            term5_2: "Personal data will be verified and automatically deleted from the system once the bicycle is successfully returned.",
+            btnAgree: "I Understand & Agree",
+            warningAlert: "🚨 <strong>WARNING:</strong> Bicycles are equipped with GPS features.",
+            submitBtn: "Submit Response",
+            loadingTitle: "Processing Data...",
+            loadingDesc: "Please wait, sending data...",
+            successTitle: "Thank You!",
+            successDesc: "Data have been recorded. Please click the button below for WhatsApp confirmation to get your lock code:",
+            waBtnText: "Confirm via WhatsApp to receive your password/code",
+            fileChosen: "No file chosen"
+        }
+    };
+
+    function setText(id, text, isHtml = false) {
+        var el = document.getElementById(id);
+        if (el) {
+            if (isHtml) {
+                el.innerHTML = text;
             } else {
-                const payload = {
-                    f_nama: document.getElementById('f_nama').value,
-                    f_kode: document.getElementById('f_kode').value,
-                    f_paket: document.getElementById('f_paket').value,
-                    fotoGabunganBase64: "",
-                    fotoGabunganType: ""
-                };
-                kirimKeAppsScript(payload);
+                el.textContent = text;
+            }
+        }
+    }
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'id' ? 'en' : 'id';
+        const t = translations[currentLang];
+
+        setText('langBtn', currentLang === 'id' ? '🌐 EN' : '🌐 ID');
+        setText('t_title', t.title);
+        setText('l_mainTitle', t.mainTitle);
+        setText('l_subTitle', t.subTitle);
+        setText('l_flowTitle', t.flowTitle, true);
+        setText('l_flow1', t.flow1);
+        setText('l_flow2', t.flow2);
+        setText('l_flow3', t.flow3, true);
+        
+        setText('l_secA', t.secA);
+        setText('l_nameLabel', t.nameLabel);
+        setText('l_nameSub', t.nameSub);
+        if(document.getElementById('f_nama')) document.getElementById('f_nama').placeholder = t.namePlaceholder;
+        
+        setText('l_selfieLabel', t.selfieLabel);
+        setText('l_chooseFile1', t.chooseFile);
+        setText('l_chooseFile2', t.chooseFile);
+        setText('l_chooseFile3', t.chooseFile);
+        setText('l_selfieDesc', t.selfieDesc);
+        
+        setText('l_idLabel', t.idLabel);
+        setText('l_idSub', t.idSub);
+        setText('l_idDesc', t.idDesc);
+        
+        setText('l_secB', t.secB);
+        setText('l_bikeCodeLabel', t.bikeCodeLabel);
+        setText('l_bikeNote', t.bikeNote);
+        setText('l_bikePlaceholder', t.bikePlaceholder);
+        setText('l_packageLabel', t.packageLabel);
+        setText('l_packagePlaceholder', t.packagePlaceholder);
+        setText('opt_p1', t.jam1);
+        setText('opt_p3', t.jam3);
+        setText('opt_p6', t.jam6);
+        setText('opt_p8', t.jam8);
+
+        setText('l_secC', t.secC);
+        setText('l_qrisText', t.qrisText);
+        setText('l_downloadQrisBtn', t.downloadQrisBtn, true);
+        setText('l_proofLabel', t.proofLabel);
+        
+        setText('l_secD', t.secD);
+        setText('l_agreePrefix', t.agreePrefix);
+        setText('l_linkTerms', t.linkTerms);
+        setText('l_agreeSuffix', t.agreeSuffix);
+        setText('l_warningAlert', t.warningAlert, true);
+        
+        setText('l_submitBtn', t.submitBtn);
+        setText('l_loadingTitle', t.loadingTitle);
+        setText('l_loadingDesc', t.loadingDesc);
+        setText('l_successTitle', t.successTitle);
+        setText('l_successDesc', t.successDesc);
+        setText('l_waBtnText', t.waBtnText);
+
+        setText('l_termsModalTitle', t.termsModalTitle);
+        setText('l_term1_title', t.term1_title);
+        setText('l_term1_1', t.term1_1);
+        setText('l_term1_2', t.term1_2);
+        
+        setText('l_term2_title', t.term2_title);
+        setText('l_term2_1', t.term2_1);
+        setText('l_term2_2', t.term2_2);
+        setText('l_term2_3', t.term2_3, true);
+        
+        setText('l_term3_title', t.term3_title);
+        setText('l_term3_1', t.term3_1);
+        setText('l_term3_2', t.term3_2);
+        
+        setText('l_term4_title', t.term4_title);
+        setText('l_term4_1', t.term4_1);
+        setText('l_term4_2', t.term4_2);
+        
+        setText('l_term5_title', t.term5_title);
+        setText('l_term5_1', t.term5_1);
+        setText('l_term5_2', t.term5_2, true);
+        
+        setText('l_btnAgree', t.btnAgree);
+
+        ['label_f_selfie', 'label_f_ktp', 'label_f_bukti'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && (el.textContent === "Belum ada file" || el.textContent === "No file chosen")) {
+                el.textContent = t.fileChosen;
             }
         });
+    }
 
-        function kirimKeAppsScript(data) {
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Diperlukan untuk bypass CORS Google Script
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                alert("Reservasi Berhasil Dikirim!");
-                document.getElementById('myForm').reset();
-                location.reload();
-            })
-            .catch(error => {
-                alert("Terjadi kesalahan: " + error);
-                document.getElementById('btnSubmit').disabled = false;
-                document.getElementById('loading').style.display = 'none';
-            });
+    function updateFileName(input, labelId) {
+        var label = document.getElementById(labelId);
+        if (input.files && input.files.length > 0) {
+            label.textContent = input.files[0].name;
+            label.style.color = "#1D976C";
         }
-    </script>
+    }
+
+    function downloadQrisHD() {
+        var imageUrl = "https://lh3.googleusercontent.com/d/1u0cKk4kcFqqhyQ-1Bh6OsPXuMi2UmU40=s0";
+        var link = document.createElement('a');
+        link.href = imageUrl;
+        link.target = "_blank";
+        link.download = "QRIS-JOW-HD.jpg";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+async function mergeThreeImages(file1, file2, file3) {
+        const loadImage = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
+        try {
+            const imgSelfie = await loadImage(file1);
+            const imgKtp = await loadImage(file2);
+            const imgBukti = await loadImage(file3);
+
+            // Dikecilkan ke 600px agar proses resize & kompresi jauh lebih ringan & cepat (sat-set)
+            const targetWidth = 500; 
+            const calcHeight = (img) => (img.height / img.width) * targetWidth;
+            
+            const h1 = calcHeight(imgSelfie);
+            const h2 = calcHeight(imgKtp);
+            const h3 = calcHeight(imgBukti);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetWidth;
+            canvas.height = h1 + h2 + h3;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.drawImage(imgSelfie, 0, 0, targetWidth, h1);
+            ctx.drawImage(imgKtp, 0, h1, targetWidth, h2);
+            ctx.drawImage(imgBukti, 0, h1 + h2, targetWidth, h3);
+
+            // Kompresi kualitas diturunkan ke 0.5 (50%) agar ukuran data minimal & kirim ke server kilat
+            return canvas.toDataURL('image/jpeg', 0.5);
+        } catch (error) {
+            console.error("Gagal menggabungkan gambar:", error);
+            throw error;
+        }
+    }
+
+    async function jalankanUpload(event) {
+        event.preventDefault(); 
+        
+        var dataKodePilihan = document.getElementById('f_kode').value;
+        var dataPaketPilihan = document.getElementById('f_paket').value;
+        
+        if (!dataKodePilihan) {
+            alert(currentLang === 'id' ? "⚠️ Mohon pilih Kode Sepeda terlebih dahulu." : "⚠️ Please select a Bike Code first.");
+            return; 
+        }
+        
+        if (!dataPaketPilihan) {
+            alert(currentLang === 'id' ? "⚠️ Mohon pilih Paket Sewa terlebih dahulu." : "⚠️ Please select a Rental Package first.");
+            return; 
+        }
+
+        var formObject = document.getElementById('formContainer');
+        var dataNama = document.getElementById('f_nama').value;
+
+        var fileSelfie = document.getElementById('f_selfie').files[0];
+        var fileKtp = document.getElementById('f_ktp').files[0];
+        var fileBukti = document.getElementById('f_bukti').files[0];
+
+        if(!fileSelfie || !fileKtp || !fileBukti) {
+             alert(currentLang === 'id' ? "⚠️ Mohon unggah ketiga foto terlebih dahulu." : "⚠️ Please upload all 3 photos.");
+             return;
+        }
+
+        formObject.style.display = 'none';
+        document.getElementById('loadingUI').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        try {
+            const combinedDataUrl = await mergeThreeImages(fileSelfie, fileKtp, fileBukti);
+            const base64DataOnly = combinedDataUrl.split(',')[1];
+
+            const dataToKirim = {
+                f_nama: dataNama,
+                f_kode: dataKodePilihan,
+                f_paket: dataPaketPilihan,
+                fotoGabunganBase64: base64DataOnly,
+                fotoGabunganType: 'image/jpeg'
+            };
+
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    document.getElementById('formContainer').style.display = 'none';
+                    document.getElementById('loadingUI').style.display = 'none';
+                    
+                    var headerSec = document.getElementById('headerSection');
+                    if(headerSec) {
+                        headerSec.style.display = 'none';
+                    }
+
+                    var nomorWA = "6281391077606";
+                    var pesanWA = currentLang === 'id' ? 
+                        "Halo, mau konfirmasi sewa sepeda self service.\n\n" + 
+                        "Nama: " + dataNama + "\n" + 
+                        "Kode Sepeda: " + dataKodePilihan + "\n" + 
+                        "Paket Sewa: " + dataPaketPilihan :
+                        "Hello, I would like to confirm my self-service bike rental.\n\n" + 
+                        "Name: " + dataNama + "\n" + 
+                        "Bike Code: " + dataKodePilihan + "\n" + 
+                        "Rental Package: " + dataPaketPilihan;
+
+                    var linkAkhir = "https://wa.me/" + nomorWA + "?text=" + encodeURIComponent(pesanWA);
+                    document.getElementById('waLinkBtn').href = linkAkhir;
+
+                    var suksesEl = document.getElementById('suksesUI');
+                    suksesEl.style.display = 'block';
+                })
+                .withFailureHandler(function(error) {
+                    alert((currentLang === 'id' ? "Gagal mengupload, periksa koneksi Anda: " : "Upload failed, check your connection: ") + error.message);
+                    formObject.style.display = 'block';
+                    document.getElementById('loadingUI').style.display = 'none';
+                })
+                .prosesUploadData(dataToKirim);
+
+        } catch (error) {
+            alert((currentLang === 'id' ? "Terjadi kesalahan sistem saat memproses foto: " : "An error occurred while processing photos: ") + error.message);
+            formObject.style.display = 'block';
+            document.getElementById('loadingUI').style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>
