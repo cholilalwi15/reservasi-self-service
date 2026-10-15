@@ -694,45 +694,49 @@ async function mergeThreeImages(file1, file2, file3) {
                 fotoGabunganType: 'image/jpeg'
             };
 
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    document.getElementById('formContainer').style.display = 'none';
-                    document.getElementById('loadingUI').style.display = 'none';
-                    
-                    var headerSec = document.getElementById('headerSection');
-                    if(headerSec) {
-                        headerSec.style.display = 'none';
-                    }
+const SCRIPT_URL = "URL_WEB_APP_APPS_SCRIPT_ANDA_DI_SINI"; // <-- Ganti dengan URL Web App Anda
 
-                    var nomorWA = "6281391077606";
-                    var pesanWA = currentLang === 'id' ? 
-                        "Halo, mau konfirmasi sewa sepeda self service.\n\n" + 
-                        "Nama: " + dataNama + "\n" + 
-                        "Kode Sepeda: " + dataKodePilihan + "\n" + 
-                        "Paket Sewa: " + dataPaketPilihan :
-                        "Hello, I would like to confirm my self-service bike rental.\n\n" + 
-                        "Name: " + dataNama + "\n" + 
-                        "Bike Code: " + dataKodePilihan + "\n" + 
-                        "Rental Package: " + dataPaketPilihan;
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(dataToKirim)
+            })
+            .then(function(response) {
+                // Karena menggunakan no-cors, kita langsung eksekusi logika sukses di sini
+                document.getElementById('formContainer').style.display = 'none';
+                document.getElementById('loadingUI').style.display = 'none';
+                
+                var headerSec = document.getElementById('headerSection');
+                if(headerSec) {
+                    headerSec.style.display = 'none';
+                }
 
-                    var linkAkhir = "https://wa.me/" + nomorWA + "?text=" + encodeURIComponent(pesanWA);
-                    document.getElementById('waLinkBtn').href = linkAkhir;
+                var nomorWA = "6281391077606";
+                var pesanWA = currentLang === 'id' ? 
+                    "Halo, mau konfirmasi sewa sepeda self service.\n\n" + 
+                    "Nama: " + dataNama + "\n" + 
+                    "Kode Sepeda: " + dataKodePilihan + "\n" + 
+                    "Paket Sewa: " + dataPaketPilihan :
+                    "Hello, I would like to confirm my self-service bike rental.\n\n" + 
+                    "Name: " + dataNama + "\n" + 
+                    "Bike Code: " + dataKodePilihan + "\n" + 
+                    "Rental Package: " + dataPaketPilihan;
 
-                    var suksesEl = document.getElementById('suksesUI');
-                    suksesEl.style.display = 'block';
-                })
-                .withFailureHandler(function(error) {
-                    alert((currentLang === 'id' ? "Gagal mengupload, periksa koneksi Anda: " : "Upload failed, check your connection: ") + error.message);
+                var linkAkhir = "https://wa.me/" + nomorWA + "?text=" + encodeURIComponent(pesanWA);
+                document.getElementById('waLinkBtn').href = linkAkhir;
+
+                var suksesEl = document.getElementById('suksesUI');
+                suksesEl.style.display = 'block';
+            })
+            .catch(function(error) {
+                alert((currentLang === 'id' ? "Gagal mengupload, periksa koneksi Anda: " : "Upload failed, check your connection: ") + error);
+                // Pastikan variabel formObject Anda mengarah ke elemen form yang benar
+                if (typeof formObject !== 'undefined' && formObject) {
                     formObject.style.display = 'block';
-                    document.getElementById('loadingUI').style.display = 'none';
-                })
-                .prosesUploadData(dataToKirim);
-
-        } catch (error) {
-            alert((currentLang === 'id' ? "Terjadi kesalahan sistem saat memproses foto: " : "An error occurred while processing photos: ") + error.message);
-            formObject.style.display = 'block';
-            document.getElementById('loadingUI').style.display = 'none';
-        }
+                }
+                document.getElementById('loadingUI').style.display = 'none';
+            });
     }
 </script>
 </body>
