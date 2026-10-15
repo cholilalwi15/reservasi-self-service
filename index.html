@@ -386,9 +386,8 @@
             packagePlaceholder: "-- Pilih Paket Sewa --",
             jam1: "1 JAM", jam3: "3 JAM", jam6: "6 JAM", jam8: "8 JAM",
             secC: "C. Pembayaran QRIS",
-            qrisText: "Scan untuk Pembayaran",
-            downloadQrisBtn: "📥 Download/screenshot QRIS",
-            qrisNote: "(Klik tombol di atas untuk otomatis menyimpan QRIS ke galeri HP)",
+            qrisText: "Scan QRIS untuk Pembayaran",
+            downloadQrisBtn: "📥 Download/Screenshot QRIS",
             proofLabel: "Upload Bukti Pembayaran",
             secD: "D. Persetujuan Aturan",
             agreePrefix: "Saya telah membaca dan menyetujui",
@@ -447,8 +446,8 @@
             packagePlaceholder: "-- Select Rental Package --",
             jam1: "1 HOUR", jam3: "3 HOURS", jam6: "6 HOURS", jam8: "8 HOURS",
             secC: "C. QRIS Payment",
-            qrisText: "Scan to Pay",
-            downloadQrisBtn: "📥 Download/screenshot QRIS",
+            qrisText: "Scan QRIS to Pay",
+            downloadQrisBtn: "📥 Download/Screenshot QRIS",
             proofLabel: "Upload Payment Proof",
             secD: "D. Agreement & Rules",
             agreePrefix: "I have read and agree to the",
@@ -691,15 +690,17 @@
                 fotoGabunganType: 'image/jpeg'
             };
 
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWRwEq7J5wy09m_HKDgrBDGscjqTzVAXUldwvKlMlrHzw4vxON4auFcDqgcBmWdY9PGQ/exec";
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7B78rSA5AiDCr3DBY1AcP-GYrQ468k7eDnfywZFE_nrFOJj6IQBgtUc5s1lX6e6-kmA/exec";
 
-            fetch(SCRIPT_URL, {
+            // Menggunakan fetch standar tanpa no-cors agar server merespon secara valid
+            const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(dataToKirim)
-            })
-            .then(function(response) {
+            });
+
+            const result = await response.json();
+
+            if (result.result === "SUKSES") {
                 document.getElementById('loadingUI').style.display = 'none';
                 
                 var headerSec = document.getElementById('headerSection');
@@ -723,15 +724,12 @@
 
                 var suksesEl = document.getElementById('suksesUI');
                 suksesEl.style.display = 'block';
-            })
-            .catch(function(error) {
-                alert((currentLang === 'id' ? "Gagal mengupload, periksa koneksi Anda: " : "Upload failed, check your connection: ") + error);
-                formContainer.style.display = 'block';
-                document.getElementById('loadingUI').style.display = 'none';
-            });
+            } else {
+                throw new Error(result.message || "Gagal menyimpan di server.");
+            }
 
-        } catch (err) {
-            alert("Terjadi kesalahan saat memproses foto: " + err.message);
+        } catch (error) {
+            alert((currentLang === 'id' ? "Gagal mengupload, periksa koneksi Anda: " : "Upload failed, check your connection: ") + error.message);
             formContainer.style.display = 'block';
             document.getElementById('loadingUI').style.display = 'none';
         }
